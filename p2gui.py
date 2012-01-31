@@ -34,8 +34,9 @@ class P2PoolConfig:
         out_file = open(self.conffile, 'w')
         try:
             for arg in self.wTree.get_widget_prefix('arg_'):
-                out_file.write(arg.get_name()[4:] + ' ' + 
-                    arg.get_text() + '\n')
+                if arg.get_text() != '':
+                    out_file.write(arg.get_name()[4:] + ' ' + 
+                        arg.get_text() + '\n')
         finally:
             out_file.close()
 
