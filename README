@@ -1,0 +1,6 @@
+This is a simple GUI to aid in creating a configuration file for p2pool.
+
+It'll read and write the config file to ~/.p2pool.conf, or under Windows 
+in %APPDATA%/P2Pool/p2pool.conf.
+
+Very early stage of development, use only at your own risk! :-)
