@@ -24,6 +24,9 @@ class P2PoolConfig:
         dic = { 
             "on_quit": gtk.main_quit,
             "on_save": self.save,
+            "on_show_btc_pass_toggled": lambda widget: 
+                self.wTree.get_widget("fld_password").set_property(
+                    "visibility", widget.get_active()),
             "on_close_dialog_close": gtk.main_quit
         }
 
@@ -37,20 +40,36 @@ class P2PoolConfig:
                 if arg.get_text() != '':
                     out_file.write(arg.get_name()[4:] + ' ' + 
                         arg.get_text() + '\n')
+            for arg in self.wTree.get_widget_prefix('flag_'):
+                if arg.get_active():
+                    out_file.write(arg.get_name()[5:] + '\n')
+            user = self.wTree.get_widget('fld_username').get_text()
+            pswd = self.wTree.get_widget('fld_password').get_text()
+            if user:
+                out_file.write(' '.join((user, pswd)))
         finally:
             out_file.close()
 
     def read_conf(self):
         cfg_file = open(self.conffile)
-        self.conf_ok = False
+        got_user = False
         try:
             for arg_line in cfg_file.read().splitlines():
-                (arg, val) = arg_line.split()
-                widget = self.wTree.get_widget("arg_" + arg)
-                if widget is None:
-                    raise Exception("Invalid config file line:\n" + arg_line)
-                widget.set_text(val)
-            self.conf_ok = True
+                if got_user:
+                    raise Exception("Config contains arguments after user/password:\n" + arg_line)
+                argval = arg_line.split()
+                widget = self.wTree.get_widget("arg_" + argval[0])
+                if widget is None: # it's either flag or userpass
+                    widget = self.wTree.get_widget("flag_" + argval[0])
+                    if widget is None: # it's userpass
+                        self.wTree.get_widget('fld_username').set_text(argval[0])
+                        if len(argval) > 1:
+                            self.wTree.get_widget('fld_password').set_text(argval[1])
+                        got_user = True
+                    else: # it's a flag
+                        widget.set_active(True)
+                else: # it's an arg
+                    widget.set_text(argval[1])
         except:
             raise
         finally:
